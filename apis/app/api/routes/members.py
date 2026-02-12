@@ -1,5 +1,6 @@
 """Member controllers - HTTP layer."""
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,6 +10,7 @@ from app.db.session import get_db
 from app.schemas.member import MemberCreate, MemberResponse, MemberUpdate
 from app.services import MemberService
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/members", tags=["members"])
 
 
@@ -45,6 +47,7 @@ def get_member(
     """Get a member by ID."""
     member = service.get_member(member_id)
     if member is None:
+        logger.warning("Get member failed: member_id=%s not found", member_id)
         raise HTTPException(status_code=404, detail="Member not found")
     return MemberResponse.model_validate(member)
 
@@ -63,5 +66,6 @@ def update_member(
         phone=body.phone,
     )
     if member is None:
+        logger.warning("Update member failed: member_id=%s not found", member_id)
         raise HTTPException(status_code=404, detail="Member not found")
     return MemberResponse.model_validate(member)

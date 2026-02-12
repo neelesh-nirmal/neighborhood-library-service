@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { booksApi, copiesApi, membersApi, loansApi, type BookCopy, type Member } from "@/lib/api";
+import { booksApi, getErrorMessage, membersApi, loansApi, type Book, type Member } from "@/lib/api";
 
 function formatDateTimeLocal(d: Date): string {
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -17,9 +17,9 @@ function dueInDays(days: number): string {
 
 export function BorrowReturnSection() {
   const [members, setMembers] = useState<Member[]>([]);
-  const [copies, setCopies] = useState<BookCopy[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [memberId, setMemberId] = useState("");
-  const [copyId, setCopyId] = useState("");
+  const [bookId, setBookId] = useState("");
   const [dueDate, setDueDate] = useState(() => dueInDays(14));
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -34,50 +34,46 @@ export function BorrowReturnSection() {
     }
   };
 
-  const loadCopies = async () => {
+  const loadBooks = async () => {
     try {
-      const books = await booksApi.list();
-      const allCopies: BookCopy[] = [];
-      for (const b of books) {
-        const list = await copiesApi.listByBook(b.id);
-        allCopies.push(...list);
-      }
-      setCopies(allCopies);
-      if (allCopies.length && !copyId) setCopyId(allCopies[0].id);
+      const data = await booksApi.list();
+      setBooks(data);
+      if (data.length && !bookId) setBookId(data[0].id);
     } catch {
-      setCopies([]);
+      setBooks([]);
     }
   };
 
   useEffect(() => {
     loadMembers();
-    loadCopies();
+    loadBooks();
   }, []);
 
   const handleBorrow = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
-    if (!memberId || !copyId || !dueDate) {
-      setError("Select member, copy, and due date.");
+    if (!memberId || !bookId || !dueDate) {
+      setError("Select member, book, and due date.");
       return;
     }
     try {
-      await loansApi.borrow({
+      await loansApi.borrowByBook({
         member_id: memberId,
-        copy_id: copyId,
+        book_id: bookId,
         due_at: new Date(dueDate).toISOString(),
       });
-      setMessage("Book borrowed.");
-      loadCopies();
+      setMessage("Book borrowed. A copy was assigned automatically.");
+      loadBooks();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to borrow");
+      setError(getErrorMessage(e, "Failed to borrow. Please check your selection and try again."));
     }
   };
 
   return (
     <div className="panel">
       <h2 style={{ marginTop: 0 }}>Borrow a book</h2>
+      <p className="muted">Choose a member and a book; an available copy is assigned automatically.</p>
       <form onSubmit={handleBorrow}>
         <div className="form-row">
           <label>
@@ -96,16 +92,16 @@ export function BorrowReturnSection() {
             </select>
           </label>
           <label>
-            Copy
+            Book
             <select
-              value={copyId}
-              onChange={(e) => setCopyId(e.target.value)}
+              value={bookId}
+              onChange={(e) => setBookId(e.target.value)}
               required
             >
-              <option value="">Select copy</option>
-              {copies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.copy_code} (book: {c.book_id.slice(0, 8)}…)
+              <option value="">Select book</option>
+              {books.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.title} — {b.author}
                 </option>
               ))}
             </select>

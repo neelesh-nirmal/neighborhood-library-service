@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { membersApi, loansApi, type LoanWithDetails, type Member } from "@/lib/api";
+import { getErrorMessage, membersApi, loansApi, type LoanWithDetails, type Member } from "@/lib/api";
 
 function formatDate(s: string) {
   try {
@@ -39,7 +39,7 @@ export function LoansSection() {
       });
       setLoans(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load loans");
+      setError(getErrorMessage(e, "Failed to load loans. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export function LoansSection() {
       setMessage("Book returned.");
       loadLoans();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to return");
+      setError(getErrorMessage(e, "Failed to return book. Please try again."));
     }
   };
 

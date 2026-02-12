@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { membersApi, type Member, type MemberCreate } from "@/lib/api";
+import { getErrorMessage, membersApi, type Member, type MemberCreate } from "@/lib/api";
 
 export function MembersSection() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -17,7 +17,7 @@ export function MembersSection() {
       const data = await membersApi.list();
       setMembers(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load members");
+      setError(getErrorMessage(e, "Failed to load members. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export function MembersSection() {
       setForm({ name: "", email: null, phone: null });
       load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create member");
+      setError(getErrorMessage(e, "Failed to create member. Please check the form and try again."));
     }
   };
 

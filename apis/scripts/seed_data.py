@@ -4,10 +4,14 @@ Run from apis/:
   uv run python scripts/seed_data.py
 """
 
+import logging
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 from sqlalchemy import select
 
@@ -132,7 +136,7 @@ def main() -> None:
 
     try:
         # --- Books ---
-        print("Books")
+        logger.info("Books")
         books_created = 0
         for data in SEED_BOOKS:
             if db.execute(select(Book).where(Book.title == data["title"])).scalar_one_or_none():
@@ -145,11 +149,11 @@ def main() -> None:
                 isbn=data.get("isbn"),
             )
             books_created += 1
-            print(f"  + {data['title']}")
-        print(f"  Created {books_created} books.\n")
+            logger.info("  + %s", data["title"])
+        logger.info("  Created %s books.\n", books_created)
 
         # --- Members ---
-        print("Members")
+        logger.info("Members")
         members_created = 0
         for data in SEED_MEMBERS:
             existing = db.execute(
@@ -164,25 +168,28 @@ def main() -> None:
                 phone=data.get("phone"),
             )
             members_created += 1
-            print(f"  + {data['name']}")
-        print(f"  Created {members_created} members.\n")
+            logger.info("  + %s", data["name"])
+        logger.info("  Created %s members.\n", members_created)
 
         # --- Copies ---
-        print("Copies")
+        logger.info("Copies")
         copies_created = 0
         for book_title, copy_code in SEED_COPIES:
             if copy_repo.get_by_copy_code(db, copy_code):
                 continue
             bid = book_id_by_title(book_title)
             if not bid:
-                print(f"  ! Skip {copy_code}: book '{book_title}' not found")
+                logger.warning("  Skip %s: book '%s' not found", copy_code, book_title)
                 continue
             copy_repo.create(db, book_id=bid, copy_code=copy_code)
             copies_created += 1
-            print(f"  + {copy_code} ({book_title})")
-        print(f"  Created {copies_created} copies.\n")
+            logger.info("  + %s (%s)", copy_code, book_title)
+        logger.info("  Created %s copies.\n", copies_created)
 
-        print("Done.")
+        logger.info("Done.")
+    except Exception as e:
+        logger.exception("Seed failed: %s", e)
+        raise
     finally:
         db.close()
 

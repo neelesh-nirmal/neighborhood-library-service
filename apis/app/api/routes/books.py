@@ -1,15 +1,17 @@
 """Book and book-copy controllers - HTTP layer."""
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.schemas.book import BookCreate, BookResponse, BookUpdate
 from app.schemas.book_copy import BookCopyCreate, BookCopyResponse
 from app.services import BookService
-from sqlalchemy.orm import Session
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/books", tags=["books"])
 
 
@@ -47,6 +49,7 @@ def get_book(
     """Get a book by ID."""
     book = service.get_book(book_id)
     if book is None:
+        logger.warning("Get book failed: book_id=%s not found", book_id)
         raise HTTPException(status_code=404, detail="Book not found")
     return BookResponse.model_validate(book)
 
@@ -66,6 +69,7 @@ def update_book(
         isbn=body.isbn,
     )
     if book is None:
+        logger.warning("Update book failed: book_id=%s not found", book_id)
         raise HTTPException(status_code=404, detail="Book not found")
     return BookResponse.model_validate(book)
 
@@ -82,6 +86,7 @@ def create_book_copy(
     """Add a physical copy of a book."""
     copy = service.create_copy(book_id, copy_code=body.copy_code)
     if copy is None:
+        logger.warning("Create copy failed: book_id=%s not found", book_id)
         raise HTTPException(status_code=404, detail="Book not found")
     return BookCopyResponse.model_validate(copy)
 

@@ -14,6 +14,14 @@ class LoanCreate(BaseModel):
     due_at: datetime = Field(..., description="When the book must be returned")
 
 
+class LoanCreateByBook(BaseModel):
+    """Payload to borrow any available copy of a book."""
+
+    member_id: UUID
+    book_id: UUID
+    due_at: datetime = Field(..., description="When the book must be returned")
+
+
 class LoanResponse(BaseModel):
     """Loan in API responses."""
 

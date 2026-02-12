@@ -29,6 +29,14 @@ class LoanRepository:
     def get_by_id(self, db: Session, id: UUID) -> Loan | None:
         return db.execute(select(Loan).where(Loan.id == id)).scalar_one_or_none()
 
+    def get_active_copy_ids(self, db: Session) -> set[UUID]:
+        """Copy IDs that are currently on loan (not yet returned)."""
+        rows = db.execute(
+            select(Loan.copy_id).where(Loan.returned_at.is_(None))
+        ).scalars().all()
+        # Single-column select: scalars().all() may return UUIDs or Row objects depending on driver
+        return {r[0] if not isinstance(r, UUID) else r for r in rows}
+
     def list(
         self,
         db: Session,

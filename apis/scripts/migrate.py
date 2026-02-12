@@ -6,16 +6,20 @@ Run from apis/:
 """
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
 # Ensure apis/ is on the path so "app" resolves
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-# Import all models so they are registered on Base.metadata
-import app.models  # noqa: F401
-from app.db.base import Base
-from app.db.config import get_database_url
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
+
+# Import all models so they are registered on Base.metadata (path set above)
+import app.models  # noqa: F401, E402
+from app.db.base import Base  # noqa: E402
+from app.db.config import get_database_url  # noqa: E402
 from sqlalchemy import create_engine
 
 
@@ -28,15 +32,19 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    url = get_database_url()
-    engine = create_engine(url)
+    try:
+        url = get_database_url()
+        engine = create_engine(url)
 
-    if args.clean:
-        Base.metadata.drop_all(engine, checkfirst=True)
-        print("Dropped all tables.")
+        if args.clean:
+            Base.metadata.drop_all(engine, checkfirst=True)
+            logger.info("Dropped all tables.")
 
-    Base.metadata.create_all(engine, checkfirst=True)
-    print("Tables OK.")
+        Base.metadata.create_all(engine, checkfirst=True)
+        logger.info("Tables OK.")
+    except Exception as e:
+        logger.exception("Migration failed: %s", e)
+        raise
 
 
 if __name__ == "__main__":

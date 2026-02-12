@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { booksApi, type Book, type BookCreate } from "@/lib/api";
+import { booksApi, getErrorMessage, type Book, type BookCreate } from "@/lib/api";
 
 export function BooksSection() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -17,7 +17,7 @@ export function BooksSection() {
       const data = await booksApi.list();
       setBooks(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load books");
+      setError(getErrorMessage(e, "Failed to load books. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ export function BooksSection() {
       setForm({ title: "", author: "", description: null, isbn: null });
       load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create book");
+      setError(getErrorMessage(e, "Failed to create book. Please check the form and try again."));
     }
   };
 

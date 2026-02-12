@@ -56,7 +56,8 @@ Tables are created and seed data loaded on first run. No extra steps.
 | GET    | /members/{member_id} | Get member |
 | PUT    | /members/{member_id} | Update member |
 | GET    | /loans | List loans (query: `member_id`, `active_only`) |
-| POST   | /loans | Borrow (body: member_id, copy_id, due_at) |
+| POST   | /loans | Borrow by copy (body: member_id, copy_id, due_at) |
+| POST   | /loans/by-book | Borrow by book — auto-assigns an available copy (body: member_id, book_id, due_at) |
 | GET    | /loans/{loan_id} | Get loan |
 | POST   | /loans/{loan_id}/return | Return book |
 

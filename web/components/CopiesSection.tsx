@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { booksApi, copiesApi, type Book, type BookCopy } from "@/lib/api";
+import { booksApi, copiesApi, getErrorMessage, type Book, type BookCopy } from "@/lib/api";
 
 export function CopiesSection() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -18,7 +18,7 @@ export function CopiesSection() {
       setBooks(data);
       if (data.length && !selectedBookId) setSelectedBookId(data[0].id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load books");
+      setError(getErrorMessage(e, "Failed to load books. Please try again."));
     }
   };
 
@@ -30,7 +30,7 @@ export function CopiesSection() {
       const data = await copiesApi.listByBook(selectedBookId);
       setCopies(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load copies");
+      setError(getErrorMessage(e, "Failed to load copies. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export function CopiesSection() {
       setCopyCode("");
       loadCopies();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to add copy");
+      setError(getErrorMessage(e, "Failed to add copy. Please check the book and copy code and try again."));
     }
   };
 
