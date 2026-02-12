@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LibraryLogo } from "@/components/LibraryLogo";
 import { BooksSection } from "@/components/BooksSection";
 import { MembersSection } from "@/components/MembersSection";
 import { CopiesSection } from "@/components/CopiesSection";
@@ -14,7 +15,15 @@ export default function Home() {
 
   return (
     <div className="container">
-      <h1>Neighborhood Library</h1>
+      <header className="site-header">
+        <div className="logo-wrap">
+          <LibraryLogo />
+        </div>
+        <div className="brand">
+          <h1 className="brand-title">Neighborhood Library</h1>
+          <p className="brand-tagline">Books, members & lending</p>
+        </div>
+      </header>
       <nav className="tabs">
         <button
           className={tab === "books" ? "active" : ""}
