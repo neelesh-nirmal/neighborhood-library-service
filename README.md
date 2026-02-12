@@ -86,6 +86,13 @@ Tables are created and seed data loaded on first run. No extra steps.
 
 Connection string: `postgresql://postgres:postgres@localhost:5432/neighborhood_library`
 
+**Clean / reset database**
+
+| Context | Command |
+|---------|---------|
+| Docker (remove DB volume, then start again to get fresh DB + seed) | `cd deploy && docker compose down -v` then `docker compose up -d --build` |
+| Local dev (drop tables, recreate; run from `apis/`) | `uv run python scripts/migrate.py --clean` |
+
 ---
 
 ## Architecture
