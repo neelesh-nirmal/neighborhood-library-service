@@ -1,8 +1,11 @@
 """Create DB tables from models. Idempotent: skips tables that already exist.
 
-Run from apis/:  uv run python scripts/migrate.py
+Run from apis/:
+  uv run python scripts/migrate.py           # create missing tables only
+  uv run python scripts/migrate.py --clean   # drop all tables, then create
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -17,11 +20,23 @@ from sqlalchemy import create_engine
 
 
 def main() -> None:
-    """Create all tables; no-op for existing ones."""
+    parser = argparse.ArgumentParser(description="Create or reset DB tables.")
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Drop all tables then create them (clean slate).",
+    )
+    args = parser.parse_args()
+
     url = get_database_url()
     engine = create_engine(url)
+
+    if args.clean:
+        Base.metadata.drop_all(engine, checkfirst=True)
+        print("Dropped all tables.")
+
     Base.metadata.create_all(engine, checkfirst=True)
-    print("Tables OK (existing ones left unchanged).")
+    print("Tables OK.")
 
 
 if __name__ == "__main__":
