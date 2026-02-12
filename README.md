@@ -2,6 +2,17 @@
 
 Library app for books, members, and lending. Stack: FastAPI, PostgreSQL, Next.js.
 
+## Table of contents
+
+- [Quick start](#quick-start)
+- [Screenshots](#screenshots)
+- [Endpoints](#endpoints)
+- [Docker](#docker)
+- [Database](#database)
+- [Architecture](#architecture)
+- [Developer setup](#developer-setup)
+- [Further improvements](#further-improvements)
+
 ---
 
 ## Quick start
@@ -108,7 +119,7 @@ erDiagram
     uuid id PK
     string title
     string author
-    string isbn
+    string isbn UK
     text description
     timestamptz created_at
     timestamptz updated_at
@@ -140,7 +151,9 @@ erDiagram
   }
 ```
 
-- One active loan per copy: unique partial index on `loans.copy_id` where `returned_at IS NULL`. FKs use `ON DELETE RESTRICT`.
+- **Relationships:** Book → BookCopy (one-to-many), BookCopy → Loan, Member → Loan. FKs use `ON DELETE RESTRICT`.
+- **One active loan per copy:** unique partial index `ix_loans_active_copy` on `loans.copy_id` where `returned_at IS NULL`.
+- **Constraints:** `returned_at >= borrowed_at` and `due_at >= borrowed_at` (check constraints on `loans`).
 
 ### Project structure
 
@@ -226,3 +239,37 @@ Optional: `cp .env.local.example .env.local`, set `NEXT_PUBLIC_API_URL` (default
 1. Postgres (`cd deploy && docker compose up -d postgres`). 
 2. API in `apis/`. 
 3. Web in `web/` → http://localhost:3000.
+
+---
+
+## Further improvements
+
+This assignment delivers a minimal, working solution. A production-grade application would typically add or strengthen the following:
+
+**Data & migrations**
+- Full migration tooling (e.g. Alembic) with versioned, reversible migrations instead of create-all/drop-all scripts.
+- Seed/migration separation and idempotent data scripts for multiple environments.
+
+**Security & auth**
+- Authentication (e.g. JWT, OAuth2) and authorization (roles/permissions) for API and UI.
+- Rate limiting and abuse protection on public endpoints.
+- Stronger secrets management (no defaults in code), secure headers, and dependency scanning.
+
+**Reliability & operations**
+- Structured logging (e.g. JSON logs) and correlation IDs for tracing.
+- Metrics and health checks (DB, dependencies) suitable for orchestration and alerting.
+- Graceful shutdown and connection pooling tuning.
+
+**API & validation**
+- Request/response validation and sanitization; consistent error schema (codes, messages) and HTTP status usage.
+- Pagination, filtering, and sorting for list endpoints.
+- API versioning strategy and deprecation handling.
+
+**Quality & resilience**
+- Automated tests (unit, integration, e2e) and higher coverage for edge cases (constraints, duplicates, not-found, conflicts).
+- Retries, timeouts, and circuit breakers for external or DB calls where appropriate.
+- Idempotency for critical mutations (e.g. borrow/return) where duplicate requests could cause issues.
+
+**Frontend & UX**
+- Loading and error states (e.g. skeletons, retry), accessibility (a11y), and responsive layout.
+- Client-side validation and clearer feedback for validation errors from the API.
