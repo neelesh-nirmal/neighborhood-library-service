@@ -3,12 +3,24 @@
 import { useState, useEffect } from "react";
 import { booksApi, copiesApi, membersApi, loansApi, type BookCopy, type Member } from "@/lib/api";
 
+function formatDateTimeLocal(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function dueInDays(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(18, 0, 0, 0);
+  return formatDateTimeLocal(d);
+}
+
 export function BorrowReturnSection() {
   const [members, setMembers] = useState<Member[]>([]);
   const [copies, setCopies] = useState<BookCopy[]>([]);
   const [memberId, setMemberId] = useState("");
   const [copyId, setCopyId] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  const [dueDate, setDueDate] = useState(() => dueInDays(14));
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -107,6 +119,18 @@ export function BorrowReturnSection() {
               required
             />
           </label>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span className="muted" style={{ fontSize: "0.85rem", marginRight: "0.25rem" }}>Quick:</span>
+            <button type="button" className="btn btn-sm" onClick={() => setDueDate(dueInDays(7))}>
+              1 week
+            </button>
+            <button type="button" className="btn btn-sm" onClick={() => setDueDate(dueInDays(14))}>
+              2 weeks
+            </button>
+            <button type="button" className="btn btn-sm" onClick={() => setDueDate(dueInDays(30))}>
+              1 month
+            </button>
+          </div>
           <button type="submit" className="btn btn-primary">
             Borrow
           </button>
