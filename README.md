@@ -6,12 +6,29 @@ Library app for books, members, and lending. Stack: FastAPI, PostgreSQL, Next.js
 
 ## Quick start
 
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and Docker Compose.
+
 ```bash
 cd deploy
 docker compose up -d --build
 ```
 
 Tables are created and seed data loaded on first run. No extra steps.
+
+- **Web UI:** http://localhost:3000  
+- **API docs:** http://localhost:8000/docs  
+
+---
+
+## Screenshots
+
+| Description | Screenshot |
+|-------------|------------|
+| Books (catalog) | ![Books](docs/screenshots/books.png) |
+| Members | ![Members](docs/screenshots/members.png) |
+| Book copies | ![Copies](docs/screenshots/copies.png) |
+| Borrow a book | ![Borrow & return](docs/screenshots/borrow-return.png) |
+| Loans | ![Loans](docs/screenshots/loans.png) |
 
 ---
 
@@ -197,4 +214,7 @@ bun run dev
 
 Optional: `cp .env.local.example .env.local`, set `NEXT_PUBLIC_API_URL` (default `http://localhost:8000/api/v1`). Scripts: `bun run dev` | `bun run build` | `bun run start` | `bun run lint`.
 
-**Local run order:** 1) Postgres (`cd deploy && docker compose up -d postgres`). 2) API in `apis/`. 3) Web in `web/` → http://localhost:3000.
+**Local run order:** 
+1. Postgres (`cd deploy && docker compose up -d postgres`). 
+2. API in `apis/`. 
+3. Web in `web/` → http://localhost:3000.
